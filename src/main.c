@@ -98,13 +98,13 @@ int handle_args(struct arguments passedArgs)
     {
         return 1;
     }
-    if(strcmp(passedArgs.type, "connect") == 0)
+    if(strcmp(passedArgs.type, "client") == 0)
     {
         // client
 
         connect_client(serverInformation);
     }
-    else if(strcmp(passedArgs.type, "accept") == 0)
+    else if(strcmp(passedArgs.type, "server") == 0)
     {
         // server
         server_setup(serverInformation);
@@ -113,7 +113,7 @@ int handle_args(struct arguments passedArgs)
     {
         fprintf(stderr,
                 "Error: Invalid type: %s\n"
-                "Available: 'connect', 'accept'\n%s",
+                "Available: 'client', 'server'\n%s",
                 passedArgs.type,
                 USAGE);
         exit(EXIT_FAILURE);

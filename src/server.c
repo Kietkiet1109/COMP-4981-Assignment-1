@@ -378,7 +378,7 @@ static int checkIfRoot(const char *filePath, char *verified_path)
     if(strcmp(filePath, "/") == 0)
     {
         printf("Requesting default file path...");
-        strcpy(verified_path, "server_files/html/index.html");
+        strcpy(verified_path, "index.html");
     }
     else
     {
@@ -465,7 +465,7 @@ int get_req_response(int client_socket, const char *filePath)
     checkIfRoot(filePath, verified_path);
 
     // append "./" to filePathWithDot
-    filePathWithDot = addCharacterToStart(verified_path, "./");
+    filePathWithDot = addCharacterToStart(verified_path, ".");
     if(filePathWithDot == NULL)
     {
         perror(". character not added");
@@ -543,7 +543,7 @@ int head_req_response(int client_socket, const char *filePath)
     checkIfRoot(filePath, verified_path);
 
     // append "." to filePathWithDot
-    filePathWithDot = addCharacterToStart(verified_path, "./");
+    filePathWithDot = addCharacterToStart(verified_path, ".");
     if(filePathWithDot == NULL)
     {
         perror(". character not added");
@@ -604,7 +604,7 @@ int post_req_response(int client_socket, const char *filePath, const char *data)
 {
     char       *duped = strdup(data);
     const char *modifiedFilePath;
-    modifiedFilePath = addCharacterToStart(filePath, "./server_files");
+    modifiedFilePath = addCharacterToStart(filePath, ".");
     /*
      * Steps:
      * Check if the data is valid
