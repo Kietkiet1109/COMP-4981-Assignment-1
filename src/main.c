@@ -101,7 +101,6 @@ int handle_args(struct arguments passedArgs)
     if(strcmp(passedArgs.type, "client") == 0)
     {
         // client
-
         connect_client(serverInformation);
     }
     else if(strcmp(passedArgs.type, "server") == 0)

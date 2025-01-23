@@ -21,8 +21,8 @@
 
 #define MAX_BUFFER_SIZE 1024
 // #define STATUS_INTERNAL_SERVER_ERR 500
-//  #define STATUS_OK 200
-#define STATUS_RES_CREATED 201
+// #define STATUS_OK 200
+// #define STATUS_RES_CREATED 201
 // todo handle the different cases in the response :: 404, 504, etc
 // todo re-comment code for more clarity
 // todo break down functions into smaller functions to pinpoint errors, etc
@@ -166,12 +166,7 @@ void start_listen(int server_fd)
 int handle_connection(int server_fd, struct clientInformation clients[], int *numClients)
 {
     TokenAndStr        requestFirstLine;
-    StringArray        requestNewlineSplit;
-    StringArray        contentLengthLineSplit;
-    int                postContentLength;
-    const int          defaultPostBodyLine = 7;
     const HTTPRequest *httpRequest;
-    char              *data;
 
     // To silence the errors :/
     httpRequest = NULL;
@@ -282,43 +277,6 @@ int handle_connection(int server_fd, struct clientInformation clients[], int *nu
                     {
                         head_req_response(clients[i].fd, httpRequest->path);
                     }
-                    else if(strcmp(httpRequest->method, "POST") == 0)
-                    {
-                        // Tokenize the string based on newlines.
-                        requestNewlineSplit = tokenizeString(buffer, "\n");
-
-                        // Get the content length.
-                        contentLengthLineSplit = tokenizeString(requestNewlineSplit.strings[4], " ");
-                        // NOLINTNEXTLINE
-                        postContentLength = atoi(contentLengthLineSplit.strings[1]);
-
-                        printf("\npostContentLength: %d\n", postContentLength);
-
-                        // Allocate memory for the data plus a newline and null terminator.
-                        data = (char *)malloc((unsigned)postContentLength + 2);    // Adjusted size
-                        if(!data)
-                        {
-                            // Handle allocation failure
-                            perror("Failed to allocate memory");
-                            exit(EXIT_FAILURE);
-                        }
-
-                        memset(data, 0,
-                               (unsigned)postContentLength + 2);    // Initialize allocated memory to zero
-
-                        // Assuming defaultPostBodyLine is the correct index for the body
-                        // content
-                        strncpy(data, requestNewlineSplit.strings[defaultPostBodyLine], (unsigned)postContentLength);
-
-                        data[postContentLength]     = '\n';    // Add newline character at the end of the content
-                        data[postContentLength + 1] = '\0';    // Explicitly null-terminate the string
-
-                        printf("\nData: %s\n", data);
-
-                        // Get the content length.
-                        post_req_response(clients[i].fd, httpRequest->path, data);
-                        free(data);
-                    }
                     else
                     {
                         // default err handling
@@ -375,7 +333,7 @@ int client_close(int activeClient)
 // todo move to server.h, remove static
 static int checkIfRoot(const char *filePath, char *verified_path)
 {
-    if(strcmp(filePath, "/") == 0)
+    if(strcmp(filePath, "../data/") == 0)
     {
         printf("Requesting default file path...");
         strcpy(verified_path, "index.html");
@@ -465,7 +423,7 @@ int get_req_response(int client_socket, const char *filePath)
     checkIfRoot(filePath, verified_path);
 
     // append "./" to filePathWithDot
-    filePathWithDot = addCharacterToStart(verified_path, ".");
+    filePathWithDot = addCharacterToStart(verified_path, "../data");
     if(filePathWithDot == NULL)
     {
         perror(". character not added");
@@ -543,7 +501,7 @@ int head_req_response(int client_socket, const char *filePath)
     checkIfRoot(filePath, verified_path);
 
     // append "." to filePathWithDot
-    filePathWithDot = addCharacterToStart(verified_path, ".");
+    filePathWithDot = addCharacterToStart(verified_path, "../data");
     if(filePathWithDot == NULL)
     {
         perror(". character not added");
@@ -569,62 +527,5 @@ int head_req_response(int client_socket, const char *filePath)
     // close file
     fclose(resource_file);
 
-    return 0;
-}
-
-int send_response_post(int client_socket, const char *resPath)
-{
-    char response[MAX_BUFFER_SIZE];
-
-    if(resPath != NULL)
-    {
-        int status_code = STATUS_RES_CREATED;
-        snprintf(response, MAX_BUFFER_SIZE, "HTTP/1.1 %d Created\r\nLocation: %s\r\n\r\n", status_code, resPath);
-    }
-    else
-    {
-        return -1;
-    }
-
-    if(send(client_socket, response, strlen(response), 0) == -1)
-    {
-        perror("Error sending response header");
-        return -1;
-    }
-    printf("Sent over response!\n");
-
-    return 0;
-}
-
-/**
- * Function to handle post requests
- * @return wheee
- */
-int post_req_response(int client_socket, const char *filePath, const char *data)
-{
-    char       *duped = strdup(data);
-    const char *modifiedFilePath;
-    modifiedFilePath = addCharacterToStart(filePath, ".");
-    /*
-     * Steps:
-     * Check if the data is valid
-     * Open db
-     * Save data
-     * Close db
-     */
-    //  dbm_open("./database/test");
-
-    printf("\nData: %s\n", duped);
-    printf("\nModified file path: %s\n", modifiedFilePath);
-
-    // TODO: Get the path to the file from the client socket.
-
-    // Append the given text to the file path.
-    appendTextToFile(modifiedFilePath, data);
-
-    printf("Sending res back to client\n");
-    send_response_post(client_socket, modifiedFilePath);
-    free(duped);
-    close(client_socket);
     return 0;
 }
