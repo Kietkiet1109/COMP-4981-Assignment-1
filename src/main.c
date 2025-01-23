@@ -34,18 +34,14 @@ int main(int argc, char *argv[])
     // NOLINTNEXTLINE
     signal(SIGINT, sigintHandler);
 
-    if(handle_args(parse_args(argc, argv)))
-    {
-    }
-
-    // else: failstate already
-
-    // handle args --> does stuff with the args
-
-    server();
-    client();
     // parse args
     // handle args --> either set up server on ip:port or connect
+    handle_args(parse_args(argc, argv));
+
+    // start server or client
+    server();
+    client();
+
     return EXIT_SUCCESS;
 }
 
@@ -54,11 +50,12 @@ struct arguments parse_args(int argc, char *argv[])
     int              opt;
     struct arguments newArgs;
 
-    // Set default values
+    // Initialize struct
     newArgs.type = NULL;
     newArgs.ip   = NULL;
     newArgs.port = NULL;
 
+    // Parse arguments
     while((opt = getopt(argc, argv, "t:i:p:")) != -1)
     {
         switch(opt)

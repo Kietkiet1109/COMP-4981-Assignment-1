@@ -25,8 +25,6 @@ typedef struct
 
 /**
  * @brief Struct that holds an array of strings.
- * @author Ethan D.
- *
  * Helps with tokenization.
  */
 typedef struct

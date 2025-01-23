@@ -7,14 +7,15 @@
 
 #include <signal.h>
 
+// struct to hold the info for server
 struct serverInformation
 {
     int   fd;
     char *ip;
     char *port;
-    //
 };
 
+// struct to hold the info for client
 struct clientInformation
 {
     int fd;
