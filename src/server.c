@@ -61,11 +61,10 @@ int server_setup(char *passedServerInfo[])
     struct serverInformation newServer;
     struct clientInformation clients[SOMAXCONN];
     int                      numClients;
-
+    // sigaction --> close
     // server setup
     newServer.ip   = passedServerInfo[0];
     newServer.port = passedServerInfo[1];
-
     // socket
     newServer.fd = socket_create();
     if(set_nonblocking(newServer.fd) == -1)
@@ -74,7 +73,6 @@ int server_setup(char *passedServerInfo[])
         close(newServer.fd);
         return 0;
     }
-
     // bind
     if(socket_bind(newServer))
     {
@@ -82,7 +80,6 @@ int server_setup(char *passedServerInfo[])
         return -1;
     }
 
-    // listen
     start_listen(newServer.fd);
 
     // Initialize the main server socket in the pollfd array
@@ -95,6 +92,8 @@ int server_setup(char *passedServerInfo[])
     server_close(newServer);
     return 0;
 }
+
+// to set up server:
 
 int socket_create(void)
 {
@@ -169,7 +168,7 @@ int handle_connection(int server_fd, struct clientInformation clients[], int *nu
     TokenAndStr        requestFirstLine;
     const HTTPRequest *httpRequest;
 
-    // To silence the errors
+    // To silence the errors :/
     httpRequest = NULL;
     printHTTPRequestStruct(httpRequest);
 
@@ -184,6 +183,7 @@ int handle_connection(int server_fd, struct clientInformation clients[], int *nu
 
         // poll used for IO multiplexing
         activity = poll(fds, (nfds_t)*numClients, -1);    // -1 means wait indefinitely
+
         if(activity == -1)
         {
             perror("poll failed");
@@ -212,6 +212,8 @@ int handle_connection(int server_fd, struct clientInformation clients[], int *nu
                 {
                     printf("New client: adding to array\n");
                     clients[*numClients].fd = client_fd;
+                    // TODO add to client struct here when ready using
+                    // clients[*numClients]
                     (*numClients)++;
 
                     fds[*numClients - 1].fd = client_fd;
@@ -334,11 +336,11 @@ static int checkIfRoot(const char *filePath, char *verified_path)
     if(strcmp(filePath, "../data/") == 0)
     {
         printf("Requesting default file path...");
-        strlcpy(verified_path, "index.html", sizeof(verified_path));
+        strcpy(verified_path, "index.html");
     }
     else
     {
-        strlcpy(verified_path, filePath, sizeof(verified_path));
+        strcpy(verified_path, filePath);
         return 1;
     }
     return 0;

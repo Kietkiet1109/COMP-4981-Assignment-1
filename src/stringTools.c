@@ -140,10 +140,10 @@ char *addCharacterToStart(const char *original, const char *toAdd)
         return NULL;
     }
 
-    // copy the 'toAdd' string followed by the 'original' string
-    // into the return string
-    strlcpy(returnString, toAdd, sizeof(returnString));
-    strlcat(returnString, original, sizeof(returnString));
+    // copy the 'toAdd' string followed by the 'original' string into the return
+    // string
+    strcpy(returnString, toAdd);
+    strcat(returnString, original);
     return returnString;
 }
 
